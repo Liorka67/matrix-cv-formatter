@@ -1,0 +1,37 @@
+services:
+  # ── Backend (Express) ──────────────────────────────────────
+  - type: web
+    name: matrix-cv-backend
+    env: node
+    plan: free                        # $0/month (sleeps after 15 min idle)
+    region: frankfurt                 # closest to Israel
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ANTHROPIC_API_KEY
+        sync: false                   # Set manually in Render dashboard
+      - key: OPENAI_API_KEY
+        value: placeholder            # Workaround for leftover validation in app.ts
+
+  # ── Frontend (React static site) ──────────────────────────
+  - type: static
+    name: matrix-cv-frontend
+    plan: free                        # $0/month, no sleep
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          name: matrix-cv-backend
+          type: web
+          property: host              # Auto-filled with backend URL after deploy
+          envVarPrefix: https://
+          envVarSuffix: /api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html     # SPA routing support

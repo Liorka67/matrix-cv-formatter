@@ -1,0 +1,44 @@
+{
+  "name": "cv-matrix-converter-backend",
+  "version": "1.0.0",
+  "description": "CV Matrix Converter Backend - Phase 1 MVP",
+  "main": "dist/app.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "dev": "ts-node src/app.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.80.0",
+    "@types/pdfkit": "^0.17.5",
+    "cors": "^2.8.5",
+    "docx": "^9.6.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mammoth": "^1.6.0",
+    "multer": "^1.4.5-lts.1",
+    "pdf-parse": "^1.1.1",
+    "pdfkit": "^0.18.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.8",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.7",
+    "jest": "^29.7.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2"
+  },
+  "keywords": [
+    "cv",
+    "converter",
+    "ai",
+    "matrix"
+  ],
+  "author": "CV Matrix Converter Team",
+  "license": "MIT"
+}
