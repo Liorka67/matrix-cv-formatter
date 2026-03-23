@@ -25,8 +25,13 @@ export const errorHandler = (
 
   // Ensure CORS headers are applied even on error
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  // OPTIONS requests should return 204 No Content
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
 
   res.status(statusCode).json({
     success: false,
@@ -38,8 +43,13 @@ export const errorHandler = (
 export const notFoundHandler = (req: Request, res: Response): void => {
   // Ensure CORS headers are applied for 404 responses too
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  // OPTIONS requests should return 204 No Content
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
 
   res.status(404).json({
     success: false,

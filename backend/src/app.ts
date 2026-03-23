@@ -24,13 +24,15 @@ if (!fs.existsSync(uploadDir)) {
 
 // Middleware
 // CORS must be first - handle both preflight and actual requests
-app.use(cors({
+const corsOptions = {
   origin: '*',
-  methods: ['GET', 'POST', 'OPTIONS'],
+  methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: false
-}));
-app.options('*', cors());
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -38,6 +40,9 @@ app.use(express.urlencoded({ extended: true }));
 // Logging
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  if (req.method === 'OPTIONS') {
+    console.log(`✅ OPTIONS hit: ${req.originalUrl}`);
+  }
   next();
 });
 
