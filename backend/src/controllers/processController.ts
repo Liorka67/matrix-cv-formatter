@@ -118,13 +118,9 @@ export const processCV = async (req: Request, res: Response): Promise<void> => {
     console.error("Error message:", error instanceof Error ? error.message : 'Unknown error');
     console.error("Error stack:", error instanceof Error ? error.stack : 'No stack');
     console.error("Error type:", error instanceof Error ? error.constructor.name : typeof error);
-    
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : JSON.stringify(error),
-      stack: error instanceof Error ? error.stack : 'No stack trace',
-      errorType: error instanceof Error ? error.constructor.name : typeof error
-    });
+
+    // Let error handler middleware apply CORS headers
+    throw error;
   }
 };
 
