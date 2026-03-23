@@ -112,7 +112,7 @@ export const generateDOCX = async (req: Request, res: Response): Promise<void> =
 
   const doc = new Document({
     sections: [{
-      properties: isHebrew ? { bidi: true } : {},
+      properties: {},
       children: paragraphs,
     }],
   });
