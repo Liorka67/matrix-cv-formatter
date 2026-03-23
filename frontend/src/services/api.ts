@@ -1,10 +1,8 @@
 import axios from 'axios';
 import { UploadResponse, ProcessResponse, MatrixCV } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3003/api';
-
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: 'https://matrix-cv-formatter.onrender.com/api',
   timeout: 60000, // 60 seconds for file processing
 });
 
