@@ -18,6 +18,7 @@ export const generateDOCX = async (req: Request, res: Response): Promise<void> =
   const heading = (text: string) => new Paragraph({
     children: [new TextRun({ text, bold: true, size: 28, color: '2c3e50' })],
     alignment,
+    bidirectional: isHebrew,
     border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'bdc3c7', space: 4 } },
     spacing: { before: 240, after: 120 },
   });
@@ -25,16 +26,21 @@ export const generateDOCX = async (req: Request, res: Response): Promise<void> =
   const body = (text: string, opts: { bold?: boolean; size?: number; color?: string } = {}) => new Paragraph({
     children: [new TextRun({ text, bold: opts.bold, size: opts.size || 22, color: opts.color || '333333' })],
     alignment,
+    bidirectional: isHebrew,
     spacing: { after: 80 },
   });
 
-  const spacer = () => new Paragraph({ children: [] });
+  const spacer = () => new Paragraph({
+    children: [],
+    bidirectional: isHebrew,
+  });
 
   // Name
   if (cv.personal_details?.name) {
     paragraphs.push(new Paragraph({
       children: [new TextRun({ text: cv.personal_details.name, bold: true, size: 48, color: '2c3e50' })],
       alignment,
+      bidirectional: isHebrew,
       spacing: { after: 80 },
     }));
   }
@@ -50,6 +56,7 @@ export const generateDOCX = async (req: Request, res: Response): Promise<void> =
     paragraphs.push(new Paragraph({
       children: [new TextRun({ text: contacts, size: 20, color: '7f8c8d' })],
       alignment,
+      bidirectional: isHebrew,
       spacing: { after: 200 },
     }));
   }
@@ -105,7 +112,7 @@ export const generateDOCX = async (req: Request, res: Response): Promise<void> =
 
   const doc = new Document({
     sections: [{
-      properties: {},
+      properties: isHebrew ? { bidi: true } : {},
       children: paragraphs,
     }],
   });

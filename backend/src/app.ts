@@ -25,7 +25,7 @@ if (!fs.existsSync(uploadDir)) {
 // Middleware
 // CORS must be first - handle both preflight and actual requests
 const corsOptions = {
-  origin: '*',
+  origin: 'https://matrix-cv-formatter-1.onrender.com',
   methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: false
