@@ -4,12 +4,12 @@ import PDFDocument from 'pdfkit';
 import { MatrixCV } from '../types';
 
 export const generateDOCX = async (req: Request, res: Response): Promise<void> => {
-  const { cv, language } = req.body as { cv: MatrixCV; language: 'he' | 'en' };
-
-  // Set CORS headers explicitly
+  // Set CORS headers FIRST - before any response
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+
+  const { cv, language } = req.body as { cv: MatrixCV; language: 'he' | 'en' };
 
   if (!cv) {
     res.status(400).json({ success: false, error: 'CV data is required' });
@@ -125,12 +125,12 @@ export const generateDOCX = async (req: Request, res: Response): Promise<void> =
 };
 
 export const generatePDF = async (req: Request, res: Response): Promise<void> => {
-  const { cv, language } = req.body as { cv: MatrixCV; language: 'he' | 'en' };
-
-  // Set CORS headers explicitly
+  // Set CORS headers FIRST - before any response
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+
+  const { cv, language } = req.body as { cv: MatrixCV; language: 'he' | 'en' };
 
   if (!cv) {
     res.status(400).json({ success: false, error: 'CV data is required' });
