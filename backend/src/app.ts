@@ -23,12 +23,15 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 // Middleware
+// CORS must be first - handle both preflight and actual requests
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false
 }));
 app.options('*', cors());
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
