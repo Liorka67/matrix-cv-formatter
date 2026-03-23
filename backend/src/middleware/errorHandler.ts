@@ -30,7 +30,8 @@ export const errorHandler = (
 
   // OPTIONS requests should return 204 No Content
   if (req.method === 'OPTIONS') {
-    return res.status(204).end();
+    res.status(204).end();
+    return;
   }
 
   res.status(statusCode).json({
@@ -48,7 +49,8 @@ export const notFoundHandler = (req: Request, res: Response): void => {
 
   // OPTIONS requests should return 204 No Content
   if (req.method === 'OPTIONS') {
-    return res.status(204).end();
+    res.status(204).end();
+    return;
   }
 
   res.status(404).json({
