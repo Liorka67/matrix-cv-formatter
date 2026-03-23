@@ -44,6 +44,10 @@ router.post('/process/:uploadId',
 router.post('/generate/docx', asyncHandler(generateDOCX));
 router.post('/generate/pdf', asyncHandler(generatePDF));
 
+// Download endpoints (alias for generate endpoints)
+router.post('/download/docx', asyncHandler(generateDOCX));
+router.post('/download/pdf', asyncHandler(generatePDF));
+
 // Test coverage calculation endpoint
 router.post('/test/coverage',
   asyncHandler(testCoverage)
