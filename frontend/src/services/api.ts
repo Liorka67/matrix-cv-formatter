@@ -56,7 +56,7 @@ export class ApiService {
    * Download CV as DOCX
    */
   static async downloadDocx(cv: MatrixCV, language: 'he' | 'en'): Promise<void> {
-    const response = await api.post('/generate/docx', { cv, language }, { responseType: 'blob' });
+    const response = await api.post('/download/docx', { cv, language }, { responseType: 'blob' });
     const url = URL.createObjectURL(new Blob([response.data]));
     const a = document.createElement('a');
     a.href = url;
@@ -71,7 +71,7 @@ export class ApiService {
    * Download CV as PDF
    */
   static async downloadPdf(cv: MatrixCV, language: 'he' | 'en'): Promise<void> {
-    const response = await api.post('/generate/pdf', { cv, language }, { responseType: 'blob' });
+    const response = await api.post('/download/pdf', { cv, language }, { responseType: 'blob' });
     const url = URL.createObjectURL(new Blob([response.data]));
     const a = document.createElement('a');
     a.href = url;
