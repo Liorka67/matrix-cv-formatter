@@ -17,12 +17,8 @@ export class ApiService {
     formData.append('language', language);
     
     try {
-      const response = await api.post<UploadResponse>('/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      
+      const response = await api.post<UploadResponse>('/upload', formData);
+
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
