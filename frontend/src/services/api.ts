@@ -3,14 +3,6 @@ import { UploadResponse, ProcessResponse, MatrixCV } from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://matrix-cv-backend.onrender.com/api';
 
-// Helper function to ensure full URL
-const getFullUrl = (endpoint: string): string => {
-  if (endpoint.startsWith('http')) {
-    return endpoint;
-  }
-  return `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
-};
-
 export class ApiService {
   
   /**
@@ -21,9 +13,11 @@ export class ApiService {
     formData.append('file', file);
     formData.append('language', language);
     
+    const uploadUrl = `${API_BASE_URL}/upload`;
+    
     try {
-      console.log('🔗 API Call: Upload to', getFullUrl('/upload'));
-      const response = await axios.post<UploadResponse>(getFullUrl('/upload'), formData, {
+      console.log('🔗 API Call: Upload to', uploadUrl);
+      const response = await axios.post<UploadResponse>(uploadUrl, formData, {
         timeout: 60000,
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -44,11 +38,12 @@ export class ApiService {
    * Process uploaded CV
    */
   static async processCV(uploadId: string, language: 'he' | 'en'): Promise<ProcessResponse> {
+    const processUrl = `${API_BASE_URL}/process/${uploadId}`;
+    
     try {
-      const url = getFullUrl(`/process/${uploadId}`);
-      console.log('🔗 API Call: Process to', url);
+      console.log('🔗 API Call: Process to', processUrl);
       
-      const response = await axios.post<ProcessResponse>(url, {
+      const response = await axios.post<ProcessResponse>(processUrl, {
         language,
       }, {
         timeout: 60000,
@@ -71,10 +66,10 @@ export class ApiService {
    * Download CV as DOCX
    */
   static async downloadDocx(cv: MatrixCV, language: 'he' | 'en'): Promise<void> {
-    const url = getFullUrl('/download/docx');
-    console.log('🔗 API Call: Download DOCX to', url);
+    const downloadUrl = `${API_BASE_URL}/download/docx`;
+    console.log('🔗 API Call: Download DOCX to', downloadUrl);
     
-    const response = await axios.post(url, { cv, language }, { 
+    const response = await axios.post(downloadUrl, { cv, language }, { 
       responseType: 'blob',
       timeout: 60000,
       headers: {
@@ -82,24 +77,24 @@ export class ApiService {
       }
     });
     
-    const downloadUrl = URL.createObjectURL(new Blob([response.data]));
+    const fileUrl = URL.createObjectURL(new Blob([response.data]));
     const a = document.createElement('a');
-    a.href = downloadUrl;
+    a.href = fileUrl;
     a.download = `CV_${cv.personal_details?.name || 'export'}.docx`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(downloadUrl);
+    URL.revokeObjectURL(fileUrl);
   }
 
   /**
    * Download CV as PDF
    */
   static async downloadPdf(cv: MatrixCV, language: 'he' | 'en'): Promise<void> {
-    const url = getFullUrl('/download/pdf');
-    console.log('🔗 API Call: Download PDF to', url);
+    const downloadUrl = `${API_BASE_URL}/download/pdf`;
+    console.log('🔗 API Call: Download PDF to', downloadUrl);
     
-    const response = await axios.post(url, { cv, language }, { 
+    const response = await axios.post(downloadUrl, { cv, language }, { 
       responseType: 'blob',
       timeout: 60000,
       headers: {
@@ -107,25 +102,26 @@ export class ApiService {
       }
     });
     
-    const downloadUrl = URL.createObjectURL(new Blob([response.data]));
+    const fileUrl = URL.createObjectURL(new Blob([response.data]));
     const a = document.createElement('a');
-    a.href = downloadUrl;
+    a.href = fileUrl;
     a.download = `CV_${cv.personal_details?.name || 'export'}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(downloadUrl);
+    URL.revokeObjectURL(fileUrl);
   }
 
   /**
    * Check API health
    */
   static async checkHealth(): Promise<boolean> {
+    const healthUrl = `${API_BASE_URL}/health`;
+    
     try {
-      const url = getFullUrl('/health');
-      console.log('🔗 API Call: Health check to', url);
+      console.log('🔗 API Call: Health check to', healthUrl);
       
-      const response = await axios.get(url, {
+      const response = await axios.get(healthUrl, {
         timeout: 10000,
         headers: {
           'Content-Type': 'application/json',
