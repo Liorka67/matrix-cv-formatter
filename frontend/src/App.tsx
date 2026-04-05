@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles/App.css';
 import FileUpload from './components/FileUpload';
 import LanguageSelector from './components/LanguageSelector';
@@ -7,6 +7,7 @@ import ResultScreen from './components/ResultScreen';
 import CVPreview from './components/CVPreview';
 import { ApiService } from './services/api';
 import { AppState, AppScreen, MatrixCV, ProcessResponse } from './types';
+import { debugApiConfig } from './utils/apiDebug';
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>({
@@ -19,6 +20,12 @@ const App: React.FC = () => {
     isLoading: false,
     processingMetadata: undefined
   });
+
+  // Debug API configuration on component mount
+  useEffect(() => {
+    console.log("NEW BUILD TEST");
+    debugApiConfig();
+  }, []);
 
   const updateState = (updates: Partial<AppState>) => {
     setState(prev => ({ ...prev, ...updates }));
