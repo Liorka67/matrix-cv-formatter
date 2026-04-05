@@ -11,6 +11,7 @@ const router = express.Router();
 // Health check endpoint
 router.get('/health', (req, res) => {
   res.json({
+    status: 'ok',
     success: true,
     message: 'CV Matrix Converter API is running',
     timestamp: new Date().toISOString(),

@@ -8,7 +8,7 @@ import routes from './routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
 const app = express();
-const PORT = process.env.PORT || 3002;
+const PORT = parseInt(process.env.PORT || '3002', 10);
 
 // Validate env
 if (!process.env.ANTHROPIC_API_KEY) {
@@ -47,6 +47,15 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'CV Matrix Converter API',
+    version: '1.0.0',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.use('/api', routes);
 
 // Error handling
@@ -54,6 +63,40 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Running on http://localhost:${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0';
+
+const server = app.listen(PORT, HOST, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Health check: /api/health`);
+});
+
+// Handle server errors
+server.on('error', (error: any) => {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  const bind = typeof PORT === 'string' ? 'Pipe ' + PORT : 'Port ' + PORT;
+
+  switch (error.code) {
+    case 'EACCES':
+      console.error(`❌ ${bind} requires elevated privileges`);
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(`❌ ${bind} is already in use`);
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('🛑 SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('✅ Process terminated');
+  });
 });
