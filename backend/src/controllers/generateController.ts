@@ -4,11 +4,6 @@ import PDFDocument from 'pdfkit';
 import { MatrixCV } from '../types';
 
 export const generateDOCX = async (req: Request, res: Response): Promise<void> => {
-  // Set explicit CORS headers for download endpoints
-  res.setHeader('Access-Control-Allow-Origin', 'https://matrix-cv-formatter-1.onrender.com');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-
   const { cv, language } = req.body as { cv: MatrixCV; language: 'he' | 'en' };
 
   if (!cv) {
@@ -126,17 +121,20 @@ export const generateDOCX = async (req: Request, res: Response): Promise<void> =
   const safeName = (cv.personal_details?.name || 'CV').replace(/[^a-zA-Z0-9א-ת\s]/g, '').replace(/\s+/g, '_');
   const filename = `CV_${safeName}.docx`;
 
+  // Set CORS headers BEFORE sending the file
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  
+  // Set Content-Type and Content-Disposition headers
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
   res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
+  
+  // Send the buffer
   res.send(buffer);
 };
 
 export const generatePDF = async (req: Request, res: Response): Promise<void> => {
-  // Set explicit CORS headers for download endpoints
-  res.setHeader('Access-Control-Allow-Origin', 'https://matrix-cv-formatter-1.onrender.com');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-
   const { cv, language } = req.body as { cv: MatrixCV; language: 'he' | 'en' };
 
   if (!cv) {
@@ -150,8 +148,16 @@ export const generatePDF = async (req: Request, res: Response): Promise<void> =>
   const safeName = (cv.personal_details?.name || 'CV').replace(/[^a-zA-Z0-9א-ת\s]/g, '').replace(/\s+/g, '_');
   const filename = `CV_${safeName}.pdf`;
 
+  // Set CORS headers BEFORE sending the file
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  
+  // Set Content-Type and Content-Disposition headers
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
+  
+  // Pipe the PDF document to response
   doc.pipe(res);
 
   const pageWidth = doc.page.width - 100;
