@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { UploadResponse, ProcessResponse, MatrixCV } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://matrix-cv-backend.onrender.com/api';
+// HARDCODED BACKEND URL - NO RELATIVE PATHS
+const BACKEND_BASE_URL = 'https://matrix-cv-backend.onrender.com/api';
 
 export class ApiService {
   
@@ -13,7 +14,8 @@ export class ApiService {
     formData.append('file', file);
     formData.append('language', language);
     
-    const uploadUrl = `${API_BASE_URL}/upload`;
+    // ABSOLUTE URL - NO RELATIVE PATHS
+    const uploadUrl = `${BACKEND_BASE_URL}/upload`;
     
     try {
       console.log('🔗 API Call: Upload to', uploadUrl);
@@ -38,7 +40,8 @@ export class ApiService {
    * Process uploaded CV
    */
   static async processCV(uploadId: string, language: 'he' | 'en'): Promise<ProcessResponse> {
-    const processUrl = `${API_BASE_URL}/process/${uploadId}`;
+    // ABSOLUTE URL - NO RELATIVE PATHS
+    const processUrl = `${BACKEND_BASE_URL}/process/${uploadId}`;
     
     try {
       console.log('🔗 API Call: Process to', processUrl);
@@ -66,7 +69,8 @@ export class ApiService {
    * Download CV as DOCX
    */
   static async downloadDocx(cv: MatrixCV, language: 'he' | 'en'): Promise<void> {
-    const downloadUrl = `${API_BASE_URL}/download/docx`;
+    // ABSOLUTE URL - NO RELATIVE PATHS
+    const downloadUrl = `${BACKEND_BASE_URL}/download/docx`;
     console.log('🔗 API Call: Download DOCX to', downloadUrl);
     
     const response = await axios.post(downloadUrl, { cv, language }, { 
@@ -91,7 +95,8 @@ export class ApiService {
    * Download CV as PDF
    */
   static async downloadPdf(cv: MatrixCV, language: 'he' | 'en'): Promise<void> {
-    const downloadUrl = `${API_BASE_URL}/download/pdf`;
+    // ABSOLUTE URL - NO RELATIVE PATHS
+    const downloadUrl = `${BACKEND_BASE_URL}/download/pdf`;
     console.log('🔗 API Call: Download PDF to', downloadUrl);
     
     const response = await axios.post(downloadUrl, { cv, language }, { 
@@ -116,7 +121,8 @@ export class ApiService {
    * Check API health
    */
   static async checkHealth(): Promise<boolean> {
-    const healthUrl = `${API_BASE_URL}/health`;
+    // ABSOLUTE URL - NO RELATIVE PATHS
+    const healthUrl = `${BACKEND_BASE_URL}/health`;
     
     try {
       console.log('🔗 API Call: Health check to', healthUrl);
