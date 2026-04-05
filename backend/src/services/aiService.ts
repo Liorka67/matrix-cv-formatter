@@ -1,25 +1,23 @@
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { MatrixCV, AIProcessingResult } from '../types';
 
-console.log("🔥 AI SERVICE V1 - DEPLOY TEST 🔥");
-
 export class AIService {
-  private anthropic: Anthropic;
+  private openai: OpenAI;
 
   constructor() {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      throw new Error('ANTHROPIC_API_KEY environment variable is required');
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY environment variable is required');
     }
 
-    this.anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
+    this.openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
     });
   }
 
   async structureCV(text: string, language: 'he' | 'en'): Promise<AIProcessingResult> {
     const startTime = Date.now();
 
-    const structuredCV = await this.callClaude(text);
+    const structuredCV = await this.callOpenAI(text);
 
     return {
       structuredCV,
@@ -31,17 +29,19 @@ export class AIService {
 
   // DEBUG METHOD: Simple AI call without validation
   async callOpenAISimple(text: string, language: 'he' | 'en'): Promise<MatrixCV> {
-    console.log(`🤖 DEBUG: Calling Claude with ${text.length} characters`);
-    return this.callClaude(text);
+    console.log(`🤖 DEBUG: Calling OpenAI with ${text.length} characters`);
+    return this.callOpenAI(text);
   }
 
-  private async callClaude(text: string): Promise<MatrixCV> {
+  private async callOpenAI(text: string): Promise<MatrixCV> {
     console.log(`🤖 AI INPUT: ${text.length} characters`);
     
-    const response = await this.anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
-      max_tokens: 8000, // Increased to prevent truncation
-      system: `You are an expert CV parser that GUARANTEES ZERO DATA LOSS.
+    const response = await this.openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `You are an expert CV parser that GUARANTEES ZERO DATA LOSS.
 
 🚨 CRITICAL MISSION: EXTRACT 100% OF THE CV CONTENT 🚨
 
@@ -99,24 +99,26 @@ QUALITY CHECK:
 - Output JSON should represent ALL this content
 - If something is missing → it goes to "additional"
 
-Return ONLY the JSON object, nothing else.`,
-      messages: [
+Return ONLY the JSON object, nothing else.`
+        },
         {
           role: 'user',
           content: `Extract ALL information from this CV into structured JSON. DO NOT lose any content:
 
 ${text}`
         }
-      ]
+      ],
+      temperature: 0,
+      max_tokens: 4000
     });
 
-    const block = response.content[0];
-    if (!block || block.type !== 'text') {
-      throw new Error('No text response from Claude');
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No response content from OpenAI');
     }
 
-    console.log(`🤖 AI OUTPUT: ${block.text.length} characters`);
-    return this.robustJSONParse(block.text, text);
+    console.log(`🤖 AI OUTPUT: ${content.length} characters`);
+    return this.robustJSONParse(content, text);
   }
 
   private robustJSONParse(aiResponse: string, originalText: string): MatrixCV {

@@ -11,8 +11,8 @@ const app = express();
 const PORT = parseInt(process.env.PORT || '3002', 10);
 
 // Validate env
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.error('❌ Missing ANTHROPIC_API_KEY');
+if (!process.env.OPENAI_API_KEY) {
+  console.error('❌ Missing OPENAI_API_KEY');
   process.exit(1);
 }
 
