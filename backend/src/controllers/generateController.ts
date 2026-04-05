@@ -4,6 +4,11 @@ import PDFDocument from 'pdfkit';
 import { MatrixCV } from '../types';
 
 export const generateDOCX = async (req: Request, res: Response): Promise<void> => {
+  // Set explicit CORS headers for download endpoints
+  res.setHeader('Access-Control-Allow-Origin', 'https://matrix-cv-formatter-1.onrender.com');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+
   const { cv, language } = req.body as { cv: MatrixCV; language: 'he' | 'en' };
 
   if (!cv) {
@@ -127,6 +132,11 @@ export const generateDOCX = async (req: Request, res: Response): Promise<void> =
 };
 
 export const generatePDF = async (req: Request, res: Response): Promise<void> => {
+  // Set explicit CORS headers for download endpoints
+  res.setHeader('Access-Control-Allow-Origin', 'https://matrix-cv-formatter-1.onrender.com');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+
   const { cv, language } = req.body as { cv: MatrixCV; language: 'he' | 'en' };
 
   if (!cv) {

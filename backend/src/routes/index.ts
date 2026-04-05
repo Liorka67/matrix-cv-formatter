@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import { uploadMiddleware, handleUploadError } from '../middleware/upload';
 import { uploadFile } from '../controllers/uploadController';
 import { processCV, testCoverage } from '../controllers/processController';
@@ -7,6 +8,17 @@ import { asyncHandler } from '../middleware/errorHandler';
 import { getStorageStats } from '../utils/fileStorage';
 
 const router = express.Router();
+
+// CORS configuration for download endpoints
+const downloadCorsOptions = {
+  origin: [
+    'https://matrix-cv-formatter-1.onrender.com',
+    'http://localhost:3001'
+  ],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false
+};
 
 // Health check endpoint
 router.get('/health', (req, res) => {
@@ -45,9 +57,12 @@ router.post('/process/:uploadId',
 router.post('/generate/docx', asyncHandler(generateDOCX));
 router.post('/generate/pdf', asyncHandler(generatePDF));
 
-// Download endpoints (alias for generate endpoints)
-router.post('/download/docx', asyncHandler(generateDOCX));
-router.post('/download/pdf', asyncHandler(generatePDF));
+// Download endpoints with explicit CORS handling
+router.options('/download/docx', cors(downloadCorsOptions));
+router.options('/download/pdf', cors(downloadCorsOptions));
+
+router.post('/download/docx', cors(downloadCorsOptions), asyncHandler(generateDOCX));
+router.post('/download/pdf', cors(downloadCorsOptions), asyncHandler(generatePDF));
 
 // Test coverage calculation endpoint
 router.post('/test/coverage',
