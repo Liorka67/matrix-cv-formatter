@@ -39,7 +39,7 @@ export class AIService {
     console.log(`🤖 AI INPUT: ${text.length} characters`);
     
     const response = await this.anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-3-5-sonnet-latest',
       max_tokens: 8000, // Increased to prevent truncation
       system: `You are an expert CV parser that GUARANTEES ZERO DATA LOSS.
 
