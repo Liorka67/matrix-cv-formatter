@@ -24,15 +24,17 @@ if (!fs.existsSync(uploadDir)) {
 
 // Middleware
 // CORS must be first - handle both preflight and actual requests
-const corsOptions = {
-  origin: 'https://matrix-cv-formatter-1.onrender.com',
-  methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false
-};
+app.use(cors({
+  origin: [
+    'https://matrix-cv-formatter-1.onrender.com',
+    'http://localhost:3001'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+// Handle preflight requests
+app.options('*', cors());
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
