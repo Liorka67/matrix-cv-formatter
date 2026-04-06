@@ -4,50 +4,81 @@ import PDFDocument from 'pdfkit';
 import { MatrixCV } from '../types';
 
 export const generateDOCX = async (req: Request, res: Response): Promise<void> => {
-  const { cv, language } = req.body as { cv: MatrixCV; language: 'he' | 'en' };
+  try {
+    // Add logging before processing
+    console.log("DOCX request received", req.body);
 
-  if (!cv) {
-    res.status(400).json({ success: false, error: 'CV data is required' });
-    return;
-  }
+    const { cv, language } = req.body as { cv: MatrixCV; language: 'he' | 'en' };
 
-  const isHebrew = language === 'he';
-  const alignment = isHebrew ? AlignmentType.RIGHT : AlignmentType.LEFT;
-  const paragraphs: Paragraph[] = [];
+    // Validate input - ensure req.body.cv exists
+    if (!cv) {
+      res.status(400).json({ success: false, error: 'CV data is required' });
+      return;
+    }
 
-  const heading = (text: string) => new Paragraph({
-    children: [new TextRun({ text, bold: true, size: 28, color: '2c3e50', rightToLeft: isHebrew })],
-    alignment,
-    bidirectional: isHebrew,
-    border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'bdc3c7', space: 4 } },
-    spacing: { before: 240, after: 120 },
-  });
+    // Validate CV structure
+    if (!cv.personal_details || typeof cv.personal_details !== 'object') {
+      res.status(400).json({ success: false, error: 'Invalid CV structure: personal_details is required' });
+      return;
+    }
 
-  const body = (text: string, opts: { bold?: boolean; size?: number; color?: string } = {}) => new Paragraph({
-    children: [new TextRun({ text, bold: opts.bold, size: opts.size || 22, color: opts.color || '333333', rightToLeft: isHebrew })],
-    alignment,
-    bidirectional: isHebrew,
-    spacing: { after: 80 },
-  });
+    if (!Array.isArray(cv.experience)) {
+      res.status(400).json({ success: false, error: 'Invalid CV structure: experience must be an array' });
+      return;
+    }
 
-  const spacer = () => new Paragraph({
-    children: [],
-    bidirectional: isHebrew,
-  });
+    if (!Array.isArray(cv.skills)) {
+      res.status(400).json({ success: false, error: 'Invalid CV structure: skills must be an array' });
+      return;
+    }
 
-  // Name
-  if (cv.personal_details?.name) {
-    paragraphs.push(new Paragraph({
-      children: [new TextRun({ text: cv.personal_details.name, bold: true, size: 48, color: '2c3e50', rightToLeft: isHebrew })],
+    if (!Array.isArray(cv.education)) {
+      res.status(400).json({ success: false, error: 'Invalid CV structure: education must be an array' });
+      return;
+    }
+
+    if (!Array.isArray(cv.languages)) {
+      res.status(400).json({ success: false, error: 'Invalid CV structure: languages must be an array' });
+      return;
+    }
+
+    const isHebrew = language === 'he';
+    const alignment = isHebrew ? AlignmentType.RIGHT : AlignmentType.LEFT;
+    const paragraphs: Paragraph[] = [];
+
+    const heading = (text: string) => new Paragraph({
+      children: [new TextRun({ text, bold: true, size: 28, color: '2c3e50', rightToLeft: isHebrew })],
+      alignment,
+      bidirectional: isHebrew,
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'bdc3c7', space: 4 } },
+      spacing: { before: 240, after: 120 },
+    });
+
+    const body = (text: string, opts: { bold?: boolean; size?: number; color?: string } = {}) => new Paragraph({
+      children: [new TextRun({ text, bold: opts.bold, size: opts.size || 22, color: opts.color || '333333', rightToLeft: isHebrew })],
       alignment,
       bidirectional: isHebrew,
       spacing: { after: 80 },
-    }));
-  }
+    });
 
-  // Contact info
-  const contacts = [
-    cv.personal_details?.email,
+    const spacer = () => new Paragraph({
+      children: [],
+      bidirectional: isHebrew,
+    });
+
+    // Name
+    if (cv.personal_details?.name) {
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ text: cv.personal_details.name, bold: true, size: 48, color: '2c3e50', rightToLeft: isHebrew })],
+        alignment,
+        bidirectional: isHebrew,
+        spacing: { after: 80 },
+      }));
+    }
+
+    // Contact info
+    const contacts = [
+      cv.personal_details?.email,
     cv.personal_details?.phone,
     cv.personal_details?.linkedin,
   ].filter(Boolean).join('  |  ');
@@ -132,17 +163,56 @@ export const generateDOCX = async (req: Request, res: Response): Promise<void> =
   
   // Send the buffer
   res.send(buffer);
+  
+  } catch (error) {
+    console.error('DOCX generation error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error occurred during DOCX generation'
+    });
+  }
 };
 
 export const generatePDF = async (req: Request, res: Response): Promise<void> => {
-  const { cv, language } = req.body as { cv: MatrixCV; language: 'he' | 'en' };
+  try {
+    // Add logging before processing
+    console.log("PDF request received", req.body);
 
-  if (!cv) {
-    res.status(400).json({ success: false, error: 'CV data is required' });
-    return;
-  }
+    const { cv, language } = req.body as { cv: MatrixCV; language: 'he' | 'en' };
 
-  const isHebrew = language === 'he';
+    // Validate input - ensure req.body.cv exists
+    if (!cv) {
+      res.status(400).json({ success: false, error: 'CV data is required' });
+      return;
+    }
+
+    // Validate CV structure
+    if (!cv.personal_details || typeof cv.personal_details !== 'object') {
+      res.status(400).json({ success: false, error: 'Invalid CV structure: personal_details is required' });
+      return;
+    }
+
+    if (!Array.isArray(cv.experience)) {
+      res.status(400).json({ success: false, error: 'Invalid CV structure: experience must be an array' });
+      return;
+    }
+
+    if (!Array.isArray(cv.skills)) {
+      res.status(400).json({ success: false, error: 'Invalid CV structure: skills must be an array' });
+      return;
+    }
+
+    if (!Array.isArray(cv.education)) {
+      res.status(400).json({ success: false, error: 'Invalid CV structure: education must be an array' });
+      return;
+    }
+
+    if (!Array.isArray(cv.languages)) {
+      res.status(400).json({ success: false, error: 'Invalid CV structure: languages must be an array' });
+      return;
+    }
+
+    const isHebrew = language === 'he';
   const doc = new PDFDocument({ margin: 50, size: 'A4' });
 
   const safeName = (cv.personal_details?.name || 'CV').replace(/[^a-zA-Z0-9א-ת\s]/g, '').replace(/\s+/g, '_');
@@ -246,4 +316,12 @@ export const generatePDF = async (req: Request, res: Response): Promise<void> =>
   }
 
   doc.end();
+  
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error occurred during PDF generation'
+    });
+  }
 };

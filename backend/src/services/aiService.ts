@@ -43,68 +43,72 @@ export class AIService {
       messages: [
         {
           role: 'user',
-          content: `You are an expert CV parser that GUARANTEES ZERO DATA LOSS.
+          content: `You are an expert CV parser. Extract ALL information into the EXACT JSON structure below.
 
-🚨 CRITICAL MISSION: EXTRACT 100% OF THE CV CONTENT 🚨
+🚨 CRITICAL REQUIREMENTS 🚨
 
-MANDATORY RULES:
-1. USE EVERY SINGLE WORD from the input CV
-2. DO NOT summarize, shorten, or skip ANY content
-3. DO NOT lose ANY information
-4. If unsure where to put content → use "additional" field
-5. Return ONLY valid JSON. No text before or after. Ensure valid syntax.
+1. Return ONLY valid JSON - no text before or after
+2. Include ALL sections even if empty
+3. Do not omit any fields
+4. Do not use undefined values
+5. If data is missing, return empty string "" or empty array [], NOT undefined
+6. Extract 100% of CV content - do not lose any information
 
-JSON STRUCTURE (STRICT):
+EXACT JSON SCHEMA (MANDATORY):
 {
   "personal_details": {
-    "name": "FULL NAME",
-    "email": "email if found",
-    "phone": "phone if found", 
-    "address": "address if found",
-    "linkedin": "linkedin if found"
+    "name": "",
+    "email": "",
+    "phone": "",
+    "address": "",
+    "linkedin": ""
   },
-  "summary": "COMPLETE professional summary or objective",
+  "summary": "",
   "experience": [
     {
-      "years": "YYYY-YYYY format",
-      "role": "EXACT job title",
-      "company": "company name",
-      "description": "COMPLETE description - ALL responsibilities, achievements, technologies, projects"
+      "years": "",
+      "role": "",
+      "company": "",
+      "description": ""
     }
   ],
-  "skills": ["ALL technical skills", "ALL soft skills", "ALL tools", "ALL technologies"],
+  "skills": [],
   "education": [
     {
-      "degree": "degree name",
-      "institution": "school name", 
-      "year": "graduation year",
-      "details": "GPA, honors, coursework, thesis - EVERYTHING"
+      "degree": "",
+      "institution": "",
+      "year": "",
+      "details": ""
     }
   ],
   "languages": [
     {
-      "name": "language name",
-      "level": "proficiency level"
+      "name": "",
+      "level": ""
     }
   ],
-  "additional": "EVERYTHING ELSE - hobbies, interests, certifications, awards, publications, references, volunteer work, military service, etc."
+  "additional": ""
 }
 
-EXTRACTION REQUIREMENTS:
-- Experience descriptions: Include EVERY responsibility, achievement, technology used
-- Skills: Extract EVERY skill mentioned (minimum 5 skills required)
-- Additional: Put ANY content that doesn't fit elsewhere
-- NO content should be lost or summarized
+EXTRACTION RULES:
+- personal_details: Extract name, email, phone, address, linkedin (empty string if not found)
+- summary: Complete professional summary/objective (empty string if not found)
+- experience: ALL work experience with complete descriptions (empty array if none)
+- skills: ALL skills mentioned - technical, soft, tools, technologies (empty array if none)
+- education: ALL education with complete details (empty array if none)
+- languages: ALL languages with proficiency levels (empty array if none)
+- additional: Everything else - certifications, awards, hobbies, military, etc. (empty string if none)
 
-QUALITY CHECK:
-- Input has ${text.length} characters
-- Output JSON should represent ALL this content
-- If something is missing → it goes to "additional"
+VALIDATION:
+- Every field must be present
+- No undefined values allowed
+- Arrays must be [] if empty, not undefined
+- Strings must be "" if empty, not undefined
+- Include ALL content from input (${text.length} characters)
 
-Return ONLY valid JSON. No text before or after. Ensure valid syntax.
+Return ONLY the JSON object. No explanations. No text before or after.
 
-Extract ALL information from this CV into structured JSON. DO NOT lose any content:
-
+CV Content:
 ${text}`
         }
       ]
