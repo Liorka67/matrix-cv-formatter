@@ -68,10 +68,16 @@ app.use(errorHandler);
 // Start server
 const HOST = process.env.HOST || '0.0.0.0';
 
+console.log(`🔧 Starting server with PORT=${PORT}, HOST=${HOST}`);
+console.log(`🔧 process.env.PORT=${process.env.PORT}`);
+console.log(`🔧 process.env.HOST=${process.env.HOST}`);
+
 const server = app.listen(PORT, HOST, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌐 Host: ${HOST}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Health check: /api/health`);
+  console.log(`🔗 Full URL: http://${HOST}:${PORT}`);
 });
 
 // Handle server errors
