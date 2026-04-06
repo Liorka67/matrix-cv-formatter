@@ -37,7 +37,7 @@ export class AIService {
     console.log(`🤖 AI INPUT: ${text.length} characters`);
     
     const response = await this.anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
+      model: 'claude-3-haiku',
       max_tokens: 4000,
       temperature: 0,
       messages: [
