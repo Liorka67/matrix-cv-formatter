@@ -13,6 +13,12 @@ export interface MatrixCV {
   education: Education[];
   languages: Language[];
   additional: string;
+  additional_sections: AdditionalSection[];
+}
+
+export interface AdditionalSection {
+  title: string;
+  content: string;
 }
 
 export interface Experience {

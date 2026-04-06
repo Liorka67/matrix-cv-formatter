@@ -128,7 +128,13 @@ EXACT JSON SCHEMA (MANDATORY):
       "level": ""
     }
   ],
-  "additional": ""
+  "additional": "",
+  "additional_sections": [
+    {
+      "title": "",
+      "content": ""
+    }
+  ]
 }
 
 EXTRACTION RULES:
@@ -139,6 +145,7 @@ EXTRACTION RULES:
 - education: ALL education with complete details (empty array if none)
 - languages: ALL languages with proficiency levels (empty array if none)
 - additional: Everything else - certifications, awards, hobbies, military, etc. (empty string if none)
+- additional_sections: If the CV contains sections like STRENGTHS, PROFESSIONAL SKILLS with categories, or any other sections that don't fit the standard schema - put them in "additional_sections" as free text, preserving the original content (empty array if none)
 
 VALIDATION:
 - Every field must be present
@@ -164,6 +171,7 @@ Return ONLY the JSON object. No explanations. No text before or after. No markdo
     console.log(`📝 AI RESPONSE PREVIEW: ${content.text.substring(0, 200)}...`);
     return this.robustJSONParse(content.text, 'PDF_FILE');
   }
+
   private async callAnthropic(text: string): Promise<MatrixCV> {
     console.log(`🤖 AI INPUT: ${text.length} characters`);
     
@@ -221,7 +229,13 @@ EXACT JSON SCHEMA (MANDATORY):
       "level": ""
     }
   ],
-  "additional": ""
+  "additional": "",
+  "additional_sections": [
+    {
+      "title": "",
+      "content": ""
+    }
+  ]
 }
 
 EXTRACTION RULES:
@@ -232,6 +246,7 @@ EXTRACTION RULES:
 - education: ALL education with complete details (empty array if none)
 - languages: ALL languages with proficiency levels (empty array if none)
 - additional: Everything else - certifications, awards, hobbies, military, etc. (empty string if none)
+- additional_sections: If the CV contains sections like STRENGTHS, PROFESSIONAL SKILLS with categories, or any other sections that don't fit the standard schema - put them in "additional_sections" as free text, preserving the original content (empty array if none)
 
 VALIDATION:
 - Every field must be present
@@ -341,7 +356,8 @@ ${text}`
       skills: Array.isArray(parsed.skills) ? parsed.skills : [],
       education: Array.isArray(parsed.education) ? parsed.education : [],
       languages: Array.isArray(parsed.languages) ? parsed.languages : [],
-      additional: parsed.additional || ''
+      additional: parsed.additional || '',
+      additional_sections: Array.isArray(parsed.additional_sections) ? parsed.additional_sections : []
     };
 
     // Ensure skills array is not empty (minimum requirement)
@@ -361,7 +377,7 @@ ${text}`
       }
     }
 
-    console.log(`✅ STRUCTURE VALIDATED - Skills: ${validated.skills.length}, Experience: ${validated.experience.length}`);
+    console.log(`✅ STRUCTURE VALIDATED - Skills: ${validated.skills.length}, Experience: ${validated.experience.length}, Additional Sections: ${validated.additional_sections.length}`);
     return validated;
   }
 
@@ -375,7 +391,8 @@ ${text}`
       skills: ['Communication', 'Problem Solving', 'Teamwork', 'Adaptability'],
       education: [],
       languages: [],
-      additional: `--- COMPLETE ORIGINAL CV CONTENT ---\n${originalText}\n\n--- NOTE ---\nThe AI response could not be parsed as valid JSON. All original content is preserved above.`
+      additional: `--- COMPLETE ORIGINAL CV CONTENT ---\n${originalText}\n\n--- NOTE ---\nThe AI response could not be parsed as valid JSON. All original content is preserved above.`,
+      additional_sections: []
     };
   }
 }

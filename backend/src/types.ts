@@ -4,6 +4,7 @@ export interface MatrixCV {
     name: string;
     email?: string;
     phone?: string;
+    address?: string;
     linkedin?: string;
   };
   summary: string;
@@ -13,6 +14,12 @@ export interface MatrixCV {
   languages: any[];
   projects?: any[];
   additional: string;
+  additional_sections: AdditionalSection[];
+}
+
+export interface AdditionalSection {
+  title: string;
+  content: string;
 }
 
 // ===== AI RESULT =====

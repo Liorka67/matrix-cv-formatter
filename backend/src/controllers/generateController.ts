@@ -141,6 +141,17 @@ export const generateDOCX = async (req: Request, res: Response): Promise<void> =
     paragraphs.push(body(cv.additional));
   }
 
+  // Additional Sections
+  if (cv.additional_sections?.length > 0) {
+    for (const section of cv.additional_sections) {
+      if (section.title && section.content) {
+        paragraphs.push(heading(section.title));
+        paragraphs.push(body(section.content));
+        paragraphs.push(spacer());
+      }
+    }
+  }
+
   const doc = new Document({
     sections: [{
       properties: {},
@@ -313,6 +324,17 @@ export const generatePDF = async (req: Request, res: Response): Promise<void> =>
   if (cv.additional) {
     addHeading(isHebrew ? 'מידע נוסף' : 'Additional');
     addText(cv.additional);
+  }
+
+  // Additional Sections
+  if (cv.additional_sections?.length > 0) {
+    for (const section of cv.additional_sections) {
+      if (section.title && section.content) {
+        addHeading(section.title);
+        addText(section.content);
+        doc.moveDown(0.3);
+      }
+    }
   }
 
   doc.end();
