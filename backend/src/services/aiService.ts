@@ -37,10 +37,10 @@ export class AIService {
     console.log(`🤖 AI INPUT: ${text.length} characters`);
     
     console.log("🚀 CALLING ANTHROPIC API");
-    console.log("🔧 Model: claude-3-haiku");
+    console.log("🔧 Model: claude-haiku-4-5-20251001");
     
     const response = await this.anthropic.messages.create({
-      model: 'claude-3-haiku',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 4000,
       temperature: 0,
       messages: [
