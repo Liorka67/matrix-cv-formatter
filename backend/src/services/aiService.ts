@@ -36,6 +36,9 @@ export class AIService {
   private async callAnthropic(text: string): Promise<MatrixCV> {
     console.log(`🤖 AI INPUT: ${text.length} characters`);
     
+    console.log("🚀 CALLING ANTHROPIC API");
+    console.log("🔧 Model: claude-3-haiku");
+    
     const response = await this.anthropic.messages.create({
       model: 'claude-3-haiku',
       max_tokens: 4000,
