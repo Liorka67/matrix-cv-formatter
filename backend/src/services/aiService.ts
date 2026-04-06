@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { MatrixCV, AIProcessingResult } from '../types';
+import fs from 'fs';
 
 export class AIService {
   private anthropic: Anthropic;
@@ -27,12 +28,142 @@ export class AIService {
     };
   }
 
+  async structureCVFromFile(filePath: string, mimeType: string, language: 'he' | 'en'): Promise<AIProcessingResult> {
+    const startTime = Date.now();
+
+    let structuredCV: MatrixCV;
+    
+    if (mimeType === 'application/pdf') {
+      structuredCV = await this.callAnthropicWithPDF(filePath);
+    } else {
+      // For non-PDF files, fall back to text extraction
+      throw new Error('Only PDF files are supported for direct file processing');
+    }
+
+    return {
+      structuredCV,
+      processingTime: Date.now() - startTime,
+      retryCount: 0,
+      finalCoverage: 1
+    };
+  }
+
   // DEBUG METHOD: Simple AI call without validation
   async callAnthropicSimple(text: string, language: 'he' | 'en'): Promise<MatrixCV> {
     console.log(`🤖 DEBUG: Calling Anthropic with ${text.length} characters`);
     return this.callAnthropic(text);
   }
 
+  private async callAnthropicWithPDF(filePath: string): Promise<MatrixCV> {
+    console.log(`🤖 AI INPUT: PDF file ${filePath}`);
+    
+    // Read PDF file as base64
+    const pdfBuffer = fs.readFileSync(filePath);
+    const pdfBase64 = pdfBuffer.toString('base64');
+    
+    console.log("🚀 CALLING ANTHROPIC API WITH PDF");
+    console.log("🔧 Model: claude-haiku-4-5-20251001");
+    console.log(`📄 PDF Size: ${pdfBuffer.length} bytes`);
+    
+    const response = await this.anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 4000,
+      temperature: 0,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'document',
+              source: {
+                type: 'base64',
+                media_type: 'application/pdf',
+                data: pdfBase64
+              }
+            },
+            {
+              type: 'text',
+              text: `You are an expert CV parser. Extract ALL information from this PDF into the EXACT JSON structure below.
+
+🚨 CRITICAL REQUIREMENTS 🚨
+
+1. Return ONLY valid JSON with no markdown formatting, no backticks, no preamble
+2. Include ALL sections even if empty
+3. Do not omit any fields
+4. Do not use undefined values
+5. If data is missing, return empty string "" or empty array [], NOT undefined
+6. Extract 100% of CV content - do not lose any information
+7. Handle multi-column layouts and complex PDF structures properly
+
+EXACT JSON SCHEMA (MANDATORY):
+{
+  "personal_details": {
+    "name": "",
+    "email": "",
+    "phone": "",
+    "address": "",
+    "linkedin": ""
+  },
+  "summary": "",
+  "experience": [
+    {
+      "years": "",
+      "role": "",
+      "company": "",
+      "description": ""
+    }
+  ],
+  "skills": [],
+  "education": [
+    {
+      "degree": "",
+      "institution": "",
+      "year": "",
+      "details": ""
+    }
+  ],
+  "languages": [
+    {
+      "name": "",
+      "level": ""
+    }
+  ],
+  "additional": ""
+}
+
+EXTRACTION RULES:
+- personal_details: Extract name, email, phone, address, linkedin (empty string if not found)
+- summary: Complete professional summary/objective (empty string if not found)
+- experience: ALL work experience with complete descriptions (empty array if none)
+- skills: ALL skills mentioned - technical, soft, tools, technologies (empty array if none)
+- education: ALL education with complete details (empty array if none)
+- languages: ALL languages with proficiency levels (empty array if none)
+- additional: Everything else - certifications, awards, hobbies, military, etc. (empty string if none)
+
+VALIDATION:
+- Every field must be present
+- No undefined values allowed
+- Arrays must be [] if empty, not undefined
+- Strings must be "" if empty, not undefined
+- Read the PDF visually and understand its layout structure
+- Handle multi-column layouts properly
+
+Return ONLY the JSON object. No explanations. No text before or after. No markdown backticks.`
+            }
+          ]
+        }
+      ]
+    });
+
+    const content = response.content[0];
+    if (!content || content.type !== 'text') {
+      throw new Error('No text content from Anthropic response');
+    }
+
+    console.log(`🤖 AI OUTPUT: ${content.text.length} characters`);
+    console.log(`📝 AI RESPONSE PREVIEW: ${content.text.substring(0, 200)}...`);
+    return this.robustJSONParse(content.text, 'PDF_FILE');
+  }
   private async callAnthropic(text: string): Promise<MatrixCV> {
     console.log(`🤖 AI INPUT: ${text.length} characters`);
     

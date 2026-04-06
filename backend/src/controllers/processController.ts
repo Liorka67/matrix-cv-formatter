@@ -53,49 +53,58 @@ export const processCV = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // STEP 4: Extract text (MINIMAL)
-    console.log("STEP 4: Extracting text");
-    const textExtractor = new TextExtractorService();
-    const extractedText = await textExtractor.extractText(filePath, mimeType);
-    console.log("STEP 4: Text extracted", { 
-      contentLength: extractedText.content.length,
-      wordCount: extractedText.metadata.wordCount 
-    });
-
-    if (!extractedText.content || extractedText.content.length < 10) {
-      console.log("STEP 4: FAILED - Text too short");
-      res.status(422).json({
-        success: false,
-        error: 'Extracted text too short'
-      });
-      return;
-    }
-
-    // STEP 5: Call AI (MINIMAL - NO VALIDATION)
-    console.log("STEP 5: Calling AI service");
+    // STEP 4: Process file with AI
+    console.log("STEP 4: Processing with AI service");
     const aiService = new AIService();
     
-    // Call AI directly without validation/retry logic
-    const result = await aiService.structureCV(extractedText.content, language);
+    let result: any;
+    let extractedText: any = null;
+    
+    if (mimeType === 'application/pdf') {
+      // For PDF files, send directly to Claude for visual processing
+      console.log("STEP 4: Using direct PDF processing");
+      result = await aiService.structureCVFromFile(filePath, mimeType, language);
+    } else {
+      // For other files, extract text first
+      console.log("STEP 4: Using text extraction method");
+      const textExtractor = new TextExtractorService();
+      extractedText = await textExtractor.extractText(filePath, mimeType);
+      console.log("STEP 4: Text extracted", { 
+        contentLength: extractedText.content.length,
+        wordCount: extractedText.metadata.wordCount 
+      });
+
+      if (!extractedText.content || extractedText.content.length < 10) {
+        console.log("STEP 4: FAILED - Text too short");
+        res.status(422).json({
+          success: false,
+          error: 'Extracted text too short'
+        });
+        return;
+      }
+
+      result = await aiService.structureCV(extractedText.content, language);
+    }
+    
     const structuredCV = result.structuredCV;
-    console.log("STEP 5: AI response received", {
+    console.log("STEP 4: AI response received", {
       hasPersonalDetails: !!structuredCV.personal_details,
       skillsCount: structuredCV.skills?.length || 0,
       experienceCount: structuredCV.experience?.length || 0
     });
 
-    // STEP 6: Clean up file
-    console.log("STEP 6: Cleaning up file");
+    // STEP 5: Clean up file
+    console.log("STEP 5: Cleaning up file");
     try {
       fs.unlinkSync(filePath);
       removeFileMetadata(uploadId);
-      console.log("STEP 6: File cleaned up successfully");
+      console.log("STEP 5: File cleaned up successfully");
     } catch (cleanupError) {
-      console.log("STEP 6: Cleanup warning:", cleanupError);
+      console.log("STEP 5: Cleanup warning:", cleanupError);
     }
 
-    // STEP 7: Return response
-    console.log("STEP 7: Preparing response");
+    // STEP 6: Return response
+    console.log("STEP 6: Preparing response");
     const response: ProcessResponse = {
       success: true,
       data: structuredCV,
@@ -103,7 +112,7 @@ export const processCV = async (req: Request, res: Response): Promise<void> => {
         processId: uuidv4(),
         language,
         processingTime: 0,
-        extractedTextLength: extractedText.content.length,
+        extractedTextLength: mimeType === 'application/pdf' ? 0 : extractedText?.content?.length || 0,
         retryCount: 0,
         finalCoverage: 1.0, // Fake coverage for now
         warnings: []
