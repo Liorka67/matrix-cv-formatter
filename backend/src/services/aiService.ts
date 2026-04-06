@@ -50,7 +50,7 @@ export class AIService {
 
 🚨 CRITICAL REQUIREMENTS 🚨
 
-1. Return ONLY valid JSON - no text before or after
+1. Return ONLY valid JSON with no markdown formatting, no backticks, no preamble
 2. Include ALL sections even if empty
 3. Do not omit any fields
 4. Do not use undefined values
@@ -109,7 +109,7 @@ VALIDATION:
 - Strings must be "" if empty, not undefined
 - Include ALL content from input (${text.length} characters)
 
-Return ONLY the JSON object. No explanations. No text before or after.
+Return ONLY the JSON object. No explanations. No text before or after. No markdown backticks.
 
 CV Content:
 ${text}`
@@ -123,15 +123,24 @@ ${text}`
     }
 
     console.log(`🤖 AI OUTPUT: ${content.text.length} characters`);
+    console.log(`📝 AI RESPONSE PREVIEW: ${content.text.substring(0, 200)}...`);
     return this.robustJSONParse(content.text, text);
   }
 
   private robustJSONParse(aiResponse: string, originalText: string): MatrixCV {
     console.log(`🔍 PARSING AI RESPONSE: ${aiResponse.length} chars`);
     
+    // Step 0: Remove markdown backticks first
+    let cleanedResponse = aiResponse
+      .replace(/```json\n?/g, '')     // Remove ```json
+      .replace(/```\n?/g, '')         // Remove closing ```
+      .trim();
+    
+    console.log(`🧹 CLEANED BACKTICKS: ${cleanedResponse.length} chars`);
+    
     // Step 1: Try direct parse first
     try {
-      const parsed = JSON.parse(aiResponse);
+      const parsed = JSON.parse(cleanedResponse);
       console.log(`✅ DIRECT JSON PARSE SUCCESS`);
       return this.validateStructure(parsed, originalText);
     } catch (directError) {
@@ -139,10 +148,11 @@ ${text}`
     }
 
     // Step 2: Extract JSON block using regex
-    const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+    const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       console.error(`❌ NO JSON FOUND in AI response`);
       console.error(`RAW AI RESPONSE:`, aiResponse);
+      console.error(`CLEANED RESPONSE:`, cleanedResponse);
       return this.createFallbackStructure(originalText);
     }
 
