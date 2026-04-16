@@ -94,6 +94,7 @@ export class AIService {
 5. If data is missing, return empty string "" or empty array [], NOT undefined
 6. Extract 100% of CV content - do not lose any information
 7. Handle multi-column layouts and complex PDF structures properly
+8. Escape any Hebrew characters like ביה״ס or רו״ח using proper JSON escaping - use the geresh character ״ instead of regular quotes " within Hebrew words
 
 EXACT JSON SCHEMA (MANDATORY):
 {
@@ -154,6 +155,7 @@ VALIDATION:
 - Strings must be "" if empty, not undefined
 - Read the PDF visually and understand its layout structure
 - Handle multi-column layouts properly
+- Use geresh character ״ instead of regular quotes " within Hebrew words like ביה״ס
 
 Return ONLY the JSON object. No explanations. No text before or after. No markdown backticks.`
             }
@@ -254,6 +256,7 @@ VALIDATION:
 - Arrays must be [] if empty, not undefined
 - Strings must be "" if empty, not undefined
 - Include ALL content from input (${text.length} characters)
+- Use geresh character ״ instead of regular quotes " within Hebrew words like ביה״ס
 
 Return ONLY the JSON object. No explanations. No text before or after. No markdown backticks.
 
@@ -305,7 +308,20 @@ ${text}`
     // Step 3: Clean the JSON
     let cleanedJSON = jsonMatch[0];
     
-    // Remove problematic characters and formatting
+    // Step 3.1: Sanitize Hebrew quotes in JSON values
+    cleanedJSON = cleanedJSON
+      .replace(/"([^"]*)"([^"]*)"([^"]*)":/g, (match, p1, p2, p3) => {
+        // Fix quotes in field names - escape internal quotes
+        return `"${p1}${p2.replace(/"/g, '״')}${p3}":`;
+      })
+      .replace(/:\s*"([^"]*)"([^",}\]]*)/g, (match, p1, p2) => {
+        // Fix quotes in string values - replace with geresh
+        return `: "${p1}${p2.replace(/"/g, '״')}"`;
+      });
+    
+    console.log(`🧹 SANITIZED HEBREW QUOTES: ${cleanedJSON.length} chars`);
+    
+    // Step 3.2: Remove problematic characters and formatting
     cleanedJSON = cleanedJSON
       .replace(/\n/g, ' ')           // Remove newlines
       .replace(/\r/g, ' ')           // Remove carriage returns  
